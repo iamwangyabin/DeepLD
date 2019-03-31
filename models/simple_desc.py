@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+from torch.nn import functional as f
 
 class Descriptor(nn.Module):
 
@@ -9,18 +10,22 @@ class Descriptor(nn.Module):
             conv_ksize=3):
         super(Descriptor, self).__init__()
         in_channel=2
-        self.conv1 = nn.Conv2d(in_channel, 64, kernel_size=conv_ksize, stride=2,padding=1, bias=use_bias)
-        self.bn1 = nn.BatchNorm2d(64)
+        channels_list = [init_num_channels * 2 ** i for i in range(num_conv_layers)]
+
+        self.conv1 = nn.Conv2d(in_channel, channels_list[0], kernel_size=conv_ksize, stride=2,padding=1, bias=use_bias)
+        self.bn1 = nn.BatchNorm2d(channels_list[0])
         self.relu = nn.ReLU(inplace=True)
-        self.conv2 = nn.Conv2d(64, 128, kernel_size=conv_ksize, stride=2,padding=1, bias=use_bias)
-        self.bn2 = nn.BatchNorm2d(128)
+        self.conv2 = nn.Conv2d(channels_list[0], channels_list[1], kernel_size=conv_ksize, stride=2,padding=1, bias=use_bias)
+        self.bn2 = nn.BatchNorm2d(channels_list[1])
         self.relu = nn.ReLU(inplace=True)
-        self.conv3 = nn.Conv2d(128, 256, kernel_size=conv_ksize, stride=2, padding=1, bias=use_bias)
-        self.bn2 = nn.BatchNorm2d(256)
+        self.conv3 = nn.Conv2d(channels_list[1], channels_list[2], kernel_size=conv_ksize, stride=2, padding=1, bias=use_bias)
+        self.bn2 = nn.BatchNorm2d(channels_list[2])
         self.relu = nn.ReLU(inplace=True)
 
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
-        self.
+        self.fc1 = nn.Linear(512 * 4, 512)
+        self.fc2 = nn.Linear(512, out_dim)
+
+        # ori_maps = f.normalize(ori_maps, dim=-1)
 
     def forward(self, x):
         residual = x
