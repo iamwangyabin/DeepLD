@@ -36,7 +36,7 @@ class BasicBlock(nn.Module):
 
 class DetectorModel(torch.nn.Module):
     def __init__(self, num_block=3, num_channels=16,conv_ksize=5,
-                 use_bias=True, min_scale=2**-3, max_scale=1, num_scales=9):
+                 use_bias=True, min_scale=2**-3, max_scale=1, num_scales=3):
 
         self.inplanes = num_channels
         self.num_blocks=num_block
@@ -65,7 +65,7 @@ class DetectorModel(torch.nn.Module):
         x=self.conv1(x)
         for i in range(self.num_blocks):
             x=self.layer(x)
-            print(1)
+            print(i)
         x=self.bn1(x)
         score_maps_list = []
         base_height_f = x.shape[2]
