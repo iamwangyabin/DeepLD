@@ -93,25 +93,24 @@ class RandomTransformer(object):
         self.max_scale_log = np.log(max_scale)
         self.min_scale_log = -self.max_scale_log if min_scale is None else np.log(min_scale)
         self.aug_mode = aug_mode
-        self.scale_table_path = os.path.join(table_dir, 'scale/scl-{:.2f}/rnd_table.npy'.format(max_scale))
-        self.ori_table_path = os.path.join(table_dir, 'ori/deg-{}/rnd_table.npy'.format(max_degree))
+        # self.scale_table_path = os.path.join(table_dir, 'scale/scl-{:.2f}/rnd_table.npy'.format(max_scale))
+        # self.ori_table_path = os.path.join(table_dir, 'ori/deg-{}/rnd_table.npy'.format(max_degree))
 
-        if self.aug_mode == 'table':
-            self.ori_random_table_data = self._load_random_table(ori_table_path, self.total_num_photos, min_table_size=dataset_size)
-            self.scale_random_table_data = self._load_random_table(scale_table_path, self.total_num_photos, min_table_size=dataset_size)
-            self.ori_random_table = tf.convert_to_tensor(self.ori_random_table_data, dtype=tf.float32)
-            self.scale_random_table = tf.convert_to_tensor(self.scale_random_table_data, dtype=tf.float32)
+        # if self.aug_mode == 'table':
+        #     self.ori_random_table_data = self._load_random_table(ori_table_path, self.total_num_photos, min_table_size=dataset_size)
+        #     self.scale_random_table_data = self._load_random_table(scale_table_path, self.total_num_photos, min_table_size=dataset_size)
+        #     self.ori_random_table = tf.convert_to_tensor(self.ori_random_table_data, dtype=tf.float32)
+        #     self.scale_random_table = tf.convert_to_tensor(self.scale_random_table_data, dtype=tf.float32)
 
+    # def _load_random_table(self, table_path, min_table_size):
+    #     if not os.path.join(table_path):
+    #         raise ValueError('Cannot load random-table from {}'.format(table_path))
+    #     random_table = np.load(table_path) # [N, 2]
 
-    def _load_random_table(self, table_path, min_table_size):
-        if not os.path.join(table_path):
-            raise ValueError('Cannot load random-table from {}'.format(table_path))
-        random_table = np.load(table_path) # [N, 2]
-
-        if len(random_table) < min_table_size:
-            raise ValueError('Shortage of table size, table size should be larger than {} but the actual size is {} in {}'.format(min_table_size, random_table, table_path))
-        print('load random table ({}) from {}'.format(random_table.shape, table_path))
-        return random_table
+    #     if len(random_table) < min_table_size:
+    #         raise ValueError('Shortage of table size, table size should be larger than {} but the actual size is {} in {}'.format(min_table_size, random_table, table_path))
+    #     print('load random table ({}) from {}'.format(random_table.shape, table_path))
+    #     return random_table
 
     def get_theta_params(self, index):
         print('aug_mode={} max_rad={}, max_scale_log={}'.format(self.aug_mode, self.max_rad, self.max_scale_log))
@@ -125,9 +124,9 @@ class RandomTransformer(object):
             print('Add random logscale={:.2f}~{:.2f}, ori={}~{}'.format(self.min_scale_log, self.max_scale_log, -self.max_rad, self.max_rad))
             scales = tf.random_uniform([2], minval=self.min_scale_log, maxval=self.max_scale_log, dtype=tf.float32)
             oris = tf.random_uniform([2], minval=-self.max_rad, maxval=self.max_rad, dtype=tf.float32)
-        elif self.aug_mode == 'table':
-            scales = self.scale_random_table[index]
-            oris = self.ori_random_table[index]
+        # elif self.aug_mode == 'table':
+        #     scales = self.scale_random_table[index]
+        #     oris = self.ori_random_table[index]
         else:
             raise ValueError('Unknown aug_mode: {}'.format(self.aug_mode))
         theta_params = tf.concat([scales, oris], axis=0)

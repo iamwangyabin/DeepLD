@@ -1,6 +1,7 @@
 import os
 import tensorflow as tf 
 import numpy as np
+from PIL import Image
 
 # 这些函数封装的真难用
 def int64_feature(value):
@@ -13,24 +14,28 @@ def float_feature(value):
     return tf.train.Feature(float_list=tf.train.FloatList(value=[value]))
 
 '''
+数据子集的文件夹路径
 input_file : '../dataset/scan'
-output_file : 
+output_file : records file path
+
 '''
 
 def write(input_file, output_file):
     root_dir = input_file
     img_paths = [x.path for x in os.scandir(root_dir+"/color/") if x.name.endswith('.jpg') or x.name.endswith('.png')]
     num_img=len(img_paths)
-    file_names = [(root_dir+'/color/{}.jpg'.format(f)).encode() for f in range(num_img)]
+    # file_names = [(root_dir+'/color/{}.jpg'.format(f)).encode() for f in range(num_img)]
     writer = tf.python_io.TFRecordWriter(output_file) #定义writer，传入目标文件路径
     
+    img = Image.open(img_paths[0]).convert(‘RGB’)
+    shape = (img.height,img.width)
     for i in range(num_img-15):
-        rgb1_filename = ("{}.jpg".format(i)).encode()
-        rgb2_filename = ('/color/'+"{}.jpg".format(i+10)).encode()
-        depth1_filename = ('/depth/'+"{}.png".format(i)).encode()
-        depth2_filename = ('/depth/'+"{}.png".format(i+10)).encode()
-        shape1 = (968, 1296, 3)
-        shape2 = (968, 1296, 3)
+        rgb1_filename = (input_file+'color'+"{}.jpg".format(i)).encode()
+        rgb2_filename = (input_file+'/color/'+"{}.jpg".format(i+10)).encode()
+        depth1_filename = (input_file+'/depth/'+"{}.png".format(i)).encode()
+        depth2_filename = (input_file+'/depth/'+"{}.png".format(i+10)).encode()
+        shape1 = shape
+        shape2 = shape
         c1Tw = np.loadtxt(root_dir+'/pose/'+"{}.txt".format(i),dtype=np.float32).ravel()
         c2Tw = np.loadtxt(root_dir+'/pose/'+"{}.txt".format(i+10),dtype=np.float32).ravel()
         K1 = np.loadtxt(root_dir+'/intrinsic/'+"intrinsic_color.txt",dtype=np.float32).ravel()
