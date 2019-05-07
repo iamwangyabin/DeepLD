@@ -4,7 +4,7 @@ import random
 import sys
 import tensorflow as tf
 
-from dataset_tools import *
+from .dataset_tools import *
 
 # def get_delta_pose(C1TW,C2TW):
 #     C1TW_R = C1TW[:3,:3]
