@@ -41,6 +41,9 @@ if __name__ == '__main__':
     scaneList = os.listdir('scans')
     for scaneName in scaneList:
         filename = './scans/'+scaneName+'/'+scaneName+'.sens'
-        output = './output/'+scaneName+'/'
-        opt = fillargs(filename, output)
+        output = './output2/'+scaneName+'/'
+        try:
+            opt = fillargs(filename, output)
+        except:
+            print("Fail to parse: " + filename)
         parser(opt)
