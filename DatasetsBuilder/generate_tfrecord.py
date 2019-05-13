@@ -26,18 +26,26 @@ def write(input_file, output_file):
     num_img=len(img_paths)
     # file_names = [(root_dir+'/color/{}.jpg'.format(f)).encode() for f in range(num_img)]
     writer = tf.python_io.TFRecordWriter(output_file) #定义writer，传入目标文件路径
-    
-    img = Image.open(img_paths[0]).convert(‘RGB’)
+    img = Image.open(img_paths[0]).convert('RGB')
     shape = (img.height,img.width)
+
+    num = 0
     for i in range(num_img-15):
-        rgb1_filename = (input_file+'color'+"{}.jpg".format(i)).encode()
+        rgb1_filename = (input_file+'/color/'+"{}.jpg".format(i)).encode()
         rgb2_filename = (input_file+'/color/'+"{}.jpg".format(i+10)).encode()
         depth1_filename = (input_file+'/depth/'+"{}.png".format(i)).encode()
         depth2_filename = (input_file+'/depth/'+"{}.png".format(i+10)).encode()
         shape1 = shape
         shape2 = shape
+        flag=False
         c1Tw = np.loadtxt(root_dir+'/pose/'+"{}.txt".format(i),dtype=np.float32).ravel()
+        if ((np.sum(c1Tw == float('nan'))+np.sum(c1Tw == float('-inf'))+np.sum(c1Tw == float('+inf'))) == 0):
+            flag=True 
         c2Tw = np.loadtxt(root_dir+'/pose/'+"{}.txt".format(i+10),dtype=np.float32).ravel()
+        if ((np.sum(c2Tw == float('nan'))+np.sum(c2Tw == float('-inf'))+np.sum(c2Tw == float('+inf'))) == 0):
+            flag=True 
+        if flag==False:
+            continue
         K1 = np.loadtxt(root_dir+'/intrinsic/'+"intrinsic_color.txt",dtype=np.float32).ravel()
         K2 = np.loadtxt(root_dir+'/intrinsic/'+"intrinsic_color.txt",dtype=np.float32).ravel()
         tf_example = tf.train.Example(
@@ -53,9 +61,11 @@ def write(input_file, output_file):
                 'K1': tf.train.Feature(float_list=tf.train.FloatList(value=K1)),
                 'K2': tf.train.Feature(float_list=tf.train.FloatList(value=K2)),
         }))
+        num += 1
         #example序列化，并写入文件
         writer.write(tf_example.SerializeToString())
     writer.close()
+    return num
 
 if __name__ == "__main__":
     write('../dataset/scan', 're1.tfrecords')

@@ -164,10 +164,6 @@ class SfMDataset(object):
         K2 = tf.reshape(example['K2'], [3,3])
         # bb1 = example['bbox1']
         # bb2 = example['bbox2']
-        # rgb1_filename = self.imroot_dir + example['rgb1_filename']
-        # rgb2_filename = self.imroot_dir + example['rgb2_filename']
-        # depth1_filename = self.root_dir + example['depth1_filename']
-        # depth2_filename = self.root_dir + example['depth2_filename']
         rgb1_filename = example['rgb1_filename']
         rgb2_filename = example['rgb2_filename']
         depth1_filename = example['depth1_filename']
@@ -203,13 +199,16 @@ class SfMDataset(object):
         valid_mask1 = tf.slice(dv1, [0,0,1], [-1,-1,1])        
         depth2 = tf.slice(dv2, [0,0,0], [-1,-1,1])        
         valid_mask2 = tf.slice(dv2, [0,0,1], [-1,-1,1])        
-        
+        # return rgb1_filename, rgb2_filename, c1Tw, c2Tw
         # Pose
         c2Tc1, c1Tc2 = get_delta_pose(c1Tw, c2Tw)
-        
+        # return rgb1_filename, rgb2_filename, c2Tc1, c1Tc2, c1Tw, c2Tw
+
         # get random thetas (doesnot support table-random)
         theta_params, use_augs = self.random_transformer.get_theta_params(None)
-
+        # with tf.Session() as sess: 
+        #     rgb1_filename2= sess.run(rgb1_filename)
+        # print(rgb1_filename2)
         # add in-plane rotation
         intheta_c2Rc1 = tf.py_func(get_inplane_rotation, [c2Tc1[:3,:3]], [tf.float32])
         intheta_c1Rc2 = tf.py_func(get_inplane_rotation, [c1Tc2[:3,:3]], [tf.float32])
